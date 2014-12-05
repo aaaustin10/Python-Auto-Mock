@@ -18,7 +18,7 @@ class easy_mock(object):
         self.__dict__[name] = value
 
     def __getitem__(self, item):
-        return None
+        raise Exception('"%s" has not been mocked' % self.name)
 
 class easy_func_mock(easy_mock):
     __call__ = lambda self, *args, **kwargs: self.callee(*args, **kwargs)
@@ -51,6 +51,9 @@ class full_mock(object):
                 instance = preserved_unit(*init_args, **init_kwargs)
                 preserved_unit = instance
             things_to_mock = [item for item in dir(unit) if not re.match(keepers, item)]
+            useless_mocks = [stub for stub in stubs if stub not in things_to_mock]
+            if useless_mocks:
+                raise Exception('Mocked nonexistant item(s): %s' % ', '.join(useless_mocks))
             for item_name in things_to_mock:
                 is_callable = callable(getattr(unit, item_name))
                 curr_old_value_node[item_name] = getattr(unit, item_name)
