@@ -1,4 +1,4 @@
-import types
+import types, re
 
 class easy_mock(object):
     locked = False
@@ -29,12 +29,14 @@ class easy_func_mock(easy_mock):
         self.callee = function
 
 class full_mock(object):
-    def __init__(self, module_name, function_name, stubs, init_args=[], init_kwargs={}):
+    def __init__(self, module_name, function_name, stubs, init_args=[], init_kwargs={}, keepers=None):
         # subclasses haven't been addressed yet
         # as the need hasn't been seen
         # should work so long as you don't need to initialize the subclass with different
         # info than you are using with the parent
-        keepers = {'__builtins__', '__class__', '__dict__', '__doc__', '__weakref__'}
+
+        # mocking the dunder items is both going down the rabbit hole and not a likely use case
+        keepers = keepers or "__.*__"
         self.unit_names = function_name.split('.')
         self.module = __import__(module_name, fromlist=[self.unit_names[0]])
 
@@ -48,7 +50,8 @@ class full_mock(object):
             if isinstance(preserved_unit, (type, types.ClassType)):
                 instance = preserved_unit(*init_args, **init_kwargs)
                 preserved_unit = instance
-            for item_name in set(dir(unit)) - keepers:
+            things_to_mock = [item for item in dir(unit) if not re.match(keepers, item)]
+            for item_name in things_to_mock:
                 is_callable = callable(getattr(unit, item_name))
                 curr_old_value_node[item_name] = getattr(unit, item_name)
                 new_value = easy_func_mock(item_name) if is_callable else easy_mock(item_name)
