@@ -30,13 +30,24 @@ class easy_func_mock(easy_mock):
 
 class full_mock(object):
     def __init__(self, module_name, function_name, stubs, init_args=[], init_kwargs={}, keepers=None):
+        self.mock_args = (module_name, function_name, init_args, init_kwargs, keepers)
+        self.stubs = stubs
+
+    def set_stubs(self, stubs):
+        self.stubs = stubs
+
+    def __enter__(self):
         # subclasses haven't been addressed yet
         # as the need hasn't been seen
         # should work so long as you don't need to initialize the subclass with different
         # info than you are using with the parent
+        module_name, function_name, init_args, init_kwargs, keepers = self.mock_args
+        if not hasattr(self, 'stubs'):
+            raise Exception('A reused mocker must call set_stubs before the next with block')
+        stubs = self.stubs
 
         # mocking the dunder items is both going down the rabbit hole and not a likely use case
-        keepers = keepers or "__.*__"
+        keepers = keepers or '__.*__'
         self.unit_names = function_name.split('.')
         self.module = __import__(module_name, fromlist=[self.unit_names[0]])
 
@@ -64,11 +75,8 @@ class full_mock(object):
             curr_old_value_node[name] = {}
             curr_old_value_node = curr_old_value_node[name]
             unit = preserved_unit
-        self.non_stubbed_item = unit
-
-    def __enter__(self):
         easy_mock.locked = True
-        return self.non_stubbed_item
+        return unit
 
     def __exit__(self, exception_type, exception_value, traceback):
         def reconstruct(unit_names, old_value_node, attr):
@@ -86,3 +94,4 @@ class full_mock(object):
 
         reconstruct(self.unit_names, self.old_values['module'], self.module)
         easy_mock.locked = False
+        del self.stubs
