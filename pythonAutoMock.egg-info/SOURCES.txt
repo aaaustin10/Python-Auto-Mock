@@ -1,8 +1,0 @@
-README.rst
-auto_mock.py
-setup.cfg
-setup.py
-pythonAutoMock.egg-info/PKG-INFO
-pythonAutoMock.egg-info/SOURCES.txt
-pythonAutoMock.egg-info/dependency_links.txt
-pythonAutoMock.egg-info/top_level.txt

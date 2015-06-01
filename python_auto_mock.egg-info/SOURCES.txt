@@ -1,0 +1,10 @@
+LICENSE
+MANIFEST.in
+README.rst
+auto_mock.py
+setup.cfg
+setup.py
+python_auto_mock.egg-info/PKG-INFO
+python_auto_mock.egg-info/SOURCES.txt
+python_auto_mock.egg-info/dependency_links.txt
+python_auto_mock.egg-info/top_level.txt
